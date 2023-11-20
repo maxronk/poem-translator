@@ -1,10 +1,6 @@
 import streamlit as st
-from dotenv import load_dotenv
 import threading
 from openai import OpenAI
-
-# load_dotenv()
-client = OpenAI()
 
 new_clipboard_text = ""
 warning = ""
@@ -17,7 +13,7 @@ def word_count(text):
     return num_of_words
 
 def gpt3_rhyme(clipboard_text, temperature, api_key):
-    OpenAI.api_key = api_key
+    client = OpenAI(api_key=api_key)
     new_clipboard_text = gpt3_meter(clipboard_text, temperature, api_key)
     sys_message = f"""
     
@@ -73,7 +69,7 @@ def gpt3_rhyme(clipboard_text, temperature, api_key):
 
 
 def gpt3_meter(clipboard_text, temperature, api_key):
-    OpenAI.api_key = api_key
+    client = OpenAI(api_key=api_key)
     new_clipboard_text = gpt3_translate(clipboard_text, api_key)
     sys_message = f"""
     
@@ -130,7 +126,7 @@ def gpt3_meter(clipboard_text, temperature, api_key):
 
 
 def gpt3_translate(clipboard_text, api_key):
-    OpenAI.api_key = api_key
+    client = OpenAI(api_key=api_key)
     max_retry = 5
     retry = 0
     while True:
@@ -228,17 +224,13 @@ def translate_poem(clipboard_text, temperature):
 # Streamlit application layout
 st.title("📜 Poem Translator")
 
-# Label
-st.markdown("#### *GPT-4 attempt of matching original rhyme and meter.*")
-# st.markdown("Tip: Try several times and combine the best results.")
+st.markdown("#### *GPT-4 attempt of matching original meaning, rhyme, and meter.*")
 
-# Multiline text input field
 clipboard_text = st.text_area("Enter poem to translate:", height=350)
 
-# Layout for slider and password input
 col1, col2 = st.columns(2)
 with col1:
-    temperature = st.slider("Creativity", min_value=0.0, max_value=1.0, value=0.25)
+    temperature = st.slider("Creativity (0 keeps it closer to original)", min_value=0.0, max_value=1.0, value=0.0)
 with col2:
     api_key = st.text_input("Enter your OpenAI API Key:", type="password")
 
@@ -252,7 +244,6 @@ if st.button("Translate Poem"):
             translation = translate_poem(clipboard_text, temperature)
 
         st.markdown("### Translated Poem:")
-        # Display the result using st.text
         st.text(translation)
     else:
         if not clipboard_text:
